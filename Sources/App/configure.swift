@@ -9,15 +9,19 @@ public func configure(_ app: Application) async throws {
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
     app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
-        hostname: Environment.get("DATABASE_HOST") ?? "localhost",
-        port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
-        username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
-        password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
-        database: Environment.get("DATABASE_NAME") ?? "vapor_database",
+        hostname: Environment.get("MUSIC_DATABASE_HOST") ?? "localhost",
+        port: Environment.get("MUSIC_DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
+        username: Environment.get("MUSIC_DATABASE_USERNAME") ?? "vapor_username",
+        password: Environment.get("MUSIC_DATABASE_PASSWORD") ?? "vapor_password",
+        database: Environment.get("MUSIC_DATABASE_NAME") ?? "vapor_database",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
+    
+    await globalState.setClientID(Environment.get("SPOTIFY_CLIENT_ID"))
+    await globalState.setClientSecret(Environment.get("SPOTIFY_CLIENT_SECRET"))
 
-    app.migrations.add(CreateTodo())
+    //migratons
+    app.migrations.add(CreateSpotifySong())
     // register routes
     try routes(app)
 }
